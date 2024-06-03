@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,6 +15,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -23,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -74,7 +81,10 @@ fun CalculateFields(modifier: Modifier) {
     }
 
     fun updateTipAmount() {
-        if (billAmount != "" && tipPercentage != "") {
+        if (billAmount == "" || tipPercentage == "") {
+            tipAmount = "0.00"
+            roundUpTip = false
+        } else if (billAmount != "" && tipPercentage != "") {
             var amount = (billAmount.toDouble() * tipPercentage.toDouble()) / 100.0
             tipAmount = amount.toString()
         }
@@ -95,23 +105,23 @@ fun CalculateFields(modifier: Modifier) {
     ) {
         Text(text = "Calculate Tip", modifier.padding(bottom = 16.dp))
         EditField(
-            billAmount, stringResource(R.string.bill_amount), KeyboardOptions(
+            billAmount, R.string.bill_amount, R.drawable.money, KeyboardOptions(
                 keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Next
             ), onValueChange = {
                 billAmount = it
                 updateTipAmount()
-            }, modifier = Modifier
+            }
         )
         Spacer(modifier.height(16.dp))
         EditField(
-            tipPercentage, stringResource(R.string.tip_percentage), KeyboardOptions(
+            tipPercentage, R.string.tip_percentage, R.drawable.percent, KeyboardOptions(
                 keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Done
             ), onValueChange = {
                 tipPercentage = it
                 updateTipAmount()
-            }, modifier = Modifier
+            }
         )
         RoundTip(roundUpTip, onCheckedChange = {
             if (billAmount != "" && tipPercentage != "") {
@@ -133,18 +143,24 @@ fun CalculateFields(modifier: Modifier) {
 @Composable
 fun EditField(
     value: String,
-    fieldLabel: String,
+    @StringRes fieldLabel: Int,
+    @DrawableRes icon: Int,
     keyboardOptions: KeyboardOptions,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier
+    onValueChange: (String) -> Unit
 ) {
     TextField(
         value = value,
+        singleLine = true,
         onValueChange = onValueChange,
-        modifier.fillMaxWidth(),
-        label = { Text(text = fieldLabel) },
         keyboardOptions = keyboardOptions,
-        singleLine = true
+        label = { Text(text = stringResource(id = fieldLabel)) },
+        leadingIcon = {
+            Icon(
+                painter = painterResource(id = icon),
+                contentDescription = null
+            )
+        },
+        modifier = Modifier.fillMaxWidth(),
     )
 }
 
